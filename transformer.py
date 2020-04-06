@@ -150,8 +150,8 @@ class TransformerModel(nn.Module):
 
     def _get_mask(self, input, causal):
         device = self.config.device
-        pad_tensor = torch.empty(1).fill_(PAD_ID).expand_as(input)
-        mask = input.to(dtype=torch.int, device=device) == pad_tensor
+        pad_tensor = torch.empty(1).fill_(PAD_ID).expand_as(input).cpu()
+        mask = input.to(dtype=torch.int).cpu() == pad_tensor.cpu()
 
         if not causal:
             return mask.to(device), mask.to(device)
