@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
+from nltk.translate.bleu_score import corpus_bleu
 
 BOS_ID = 1
 EOS_ID = 2
@@ -287,7 +288,13 @@ class Trainer(object):
             if unfinished_sents.max() == 0:
                 break
 
-        return generated
+        return generated.to(dtype=torch.int)
+
+    def __predict(self, x, y, causal):
+        enc_output = self.encoder(x)
+        dec_output = self.decoder(y[:, :-1], enc_output, x == PAD_ID, causal)
+
+        return self.decoder.predict(dec_output)
 
     def step(self, data=None):
         self.encoder.train()
@@ -298,17 +305,14 @@ class Trainer(object):
         else:
             (x, y) = data
 
-        enc_output = self.encoder(x)
-        dec_output = self.decoder(y[:, :-1], enc_output, x == PAD_ID, True)
-
-        gen_output = self.decoder.predict(dec_output)
+        scores = self.__predict(x, y, True)
 
         self.optimizer_enc.zero_grad()
         self.optimizer_dec.zero_grad()
 
         nwords = (y[:, 1:] != PAD_ID).sum().item()
 
-        loss = self.criterion(gen_output, y[:, 1:], nwords)
+        loss = self.criterion(scores, y[:, 1:], nwords)
         loss.backward()
 
         self.optimizer_enc.step()
@@ -356,6 +360,54 @@ class Trainer(object):
             # print('input : {}'.format(x[i]))
             # print('output: {}'.format(word_ids[i])) 
             # print('') 
+
+    def train(self):
+        data_train = MTDataset(args, 'train')
+        dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size)
+
+        print(f'start epoch {epoch}')
+        for i, (x, y) in enumerate(dataloader):
+            x = x.to(self.config.device)
+            y = y.to(self.config.device)
+            self.step((x, y))
+            self.step_end(i)
+
+    def evaluate(self):
+        self.encoder.eval()
+        self.decoder.eval()
+
+        data = MTDataset(args, 'valid')
+        dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
+
+        n_words = 0
+        xe_loss = 0
+        n_valid = 0
+        refs = []
+        hyps = []
+
+        for _, (x, y) in enumerate(dataloader):
+            x = x.to(self.config.device)
+            y = y.to(self.config.device)
+
+            scores = self.__predict(x, y, True)
+
+            y = y[:, 1:]
+            nwords = (y != PAD_ID).sum().item()
+            loss = self.criterion(scores, y, nwords)
+
+            n_words += nwords
+            xe_loss += loss.item() * nwords
+            n_valid += (scores.max(2)[1] == y).sum().item()
+
+            generated = self.__generate(x)
+            hyps.extend(generated[:, 1:].tolist())
+            refs.extend(y.unsqueeze(1).tolist())
+
+        bleu = corpus_bleu(refs, hyps)
+
+        print('ppl: {}'.format(np.exp(xe_loss / n_words) if n_words > 0 else 1e9))
+        print('acc: {}'.format(100. * n_valid / n_words if n_words > 0 else 0.))
+        print('bleu: {}'.format(bleu))
 
 class LabelSmoothing(nn.Module):
     def __init__(self, size, smoothing):
@@ -438,6 +490,8 @@ if __name__ == '__main__':
     parser.add_argument('--model', default='model.pth', help='file to save model parameters')
     parser.add_argument('--generate_test', action='store_true', help='only generate translated sentences')
     parser.add_argument('--train_test', action='store_true', help='training copy task with random value')
+    parser.add_argument('--eval_only', action='store_true', help='execute evaluation only')
+    parser.add_argument('--epochs_by_eval', type=int, default=5, help='evaluate by every this epochs ')
     args = parser.parse_args()
     print(args)
 
@@ -457,8 +511,9 @@ if __name__ == '__main__':
         trainer.generate_test()
         sys.exit()
 
-    data_train = MTDataset(args, 'train')
-    dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size)
+    if args.eval_only:
+        trainer.evaluate()
+        sys.exit()
 
     for epoch in range(args.epochs):
         start_time = time.time()
@@ -470,13 +525,10 @@ if __name__ == '__main__':
             trainer.save()
             continue
 
-        print(f'start epoch {epoch}')
-        for i, (x, y) in enumerate(dataloader):
-            x = x.to(device)
-            y = y.to(device)
-            trainer.step((x, y))
-            trainer.step_end(i)
-                      
-        trainer.save()
+        trainer.train()
+
+        if epoch % args.epochs_by_eval == 0:
+            trainer.evaluate()
+            trainer.save()
 
 
