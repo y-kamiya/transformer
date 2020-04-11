@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 from nltk.translate.bleu_score import corpus_bleu
 
 BOS_ID = 1
@@ -222,6 +223,8 @@ class Trainer(object):
             'loss': 0.0,
         }
 
+        self.writer = SummaryWriter(log_dir=config.tensorboard_log_dir)
+
     def save(self):
         data = {
             'encoder': self.encoder.state_dict(),
@@ -322,6 +325,8 @@ class Trainer(object):
         self.stats['sentences'] += x.size(0)
         self.stats['words'] += nwords
 
+        self.writer.add_scalar('loss/train', loss, self.steps, time.time())
+
     def step_end(self, step):
         self.steps += 1
         self._print_log()
@@ -372,7 +377,7 @@ class Trainer(object):
             self.step((x, y))
             self.step_end(i)
 
-    def evaluate(self):
+    def evaluate(self, epoch=None):
         self.encoder.eval()
         self.decoder.eval()
 
@@ -403,10 +408,19 @@ class Trainer(object):
             hyps.extend(generated[:, 1:].tolist())
             refs.extend(y.unsqueeze(1).tolist())
 
+        loss = xe_loss / n_words if n_words > 0 else 1e9
+        ppl = np.exp(loss)
+        acc = 100. * n_valid / n_words if n_words > 0 else 0.
         bleu = corpus_bleu(refs, hyps)
 
-        print('ppl: {}'.format(np.exp(xe_loss / n_words) if n_words > 0 else 1e9))
-        print('acc: {}'.format(100. * n_valid / n_words if n_words > 0 else 0.))
+        if epoch is not None:
+            self.writer.add_scalar('loss/eval', loss, epoch)
+            self.writer.add_scalar('ppl/eval', ppl, epoch)
+            self.writer.add_scalar('acc/eval', acc, epoch)
+            self.writer.add_scalar('bleu/eval', bleu, epoch)
+
+        print('ppl: {}'.format(ppl))
+        print('acc: {}'.format(acc))
         print('bleu: {}'.format(bleu))
 
 class LabelSmoothing(nn.Module):
@@ -479,6 +493,7 @@ if __name__ == '__main__':
     parser.add_argument('--tgt', default='en', help='target language')
     parser.add_argument('--epochs', type=int, default=10, help='epoch count')
     parser.add_argument('--batch_size', type=int, default=2, help='size of batch')
+    parser.add_argument('--log_dir', default='default', help='name of log dir')
     parser.add_argument('--log_interval', type=int, default=5, help='step num to display log')
     parser.add_argument('--vocab_size', type=int, default=8, help='vocabulary size for copy task')
     parser.add_argument('--n_layers', type=int, default=3, help='number of layers')
@@ -502,6 +517,8 @@ if __name__ == '__main__':
     args.device_name = device_name
     args.device = device
     args.model_path = f'{args.dataroot}/{args.model}'
+    args.tensorboard_log_dir = f'{args.dataroot}/runs/{args.log_dir}'
+    os.makedirs(args.tensorboard_log_dir, exist_ok=True)
 
     trainer = Trainer(args)
 
@@ -516,8 +533,6 @@ if __name__ == '__main__':
         sys.exit()
 
     for epoch in range(args.epochs):
-        start_time = time.time()
-
         if args.train_test:
             for i in range(100):
                 trainer.step()
@@ -528,7 +543,7 @@ if __name__ == '__main__':
         trainer.train()
 
         if epoch % args.epochs_by_eval == 0:
-            trainer.evaluate()
+            trainer.evaluate(epoch)
             trainer.save()
 
 
