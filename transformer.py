@@ -277,8 +277,9 @@ class Trainer(object):
         batch_size, _ = x.shape
         generated = torch.empty(batch_size, max_len).fill_(PAD_ID)
         generated[:,0] = BOS_ID
+        generated = generated.to(self.config.device)
 
-        unfinished_sents = torch.ones(batch_size)
+        unfinished_sents = torch.ones(batch_size, device=self.config.device)
 
         for i in range(1, max_len):
             dec_output = self.decoder(generated[:, :i], enc_output, src_mask, True)
