@@ -10,6 +10,7 @@ from torch import optim
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from nltk.translate.bleu_score import corpus_bleu
+import apex
 
 BOS_ID = 1
 EOS_ID = 2
@@ -205,6 +206,18 @@ class Trainer(object):
         self.optimizer_dec = self._get_optimizer(self.decoder)
         self.scheduler_dec = self._get_scheduler(self.optimizer_dec)
 
+        if self.config.fp16:
+            self.encoder, self.optimizer_enc = apex.amp.initialize(
+                self.encoder,
+                self.optimizer_enc,
+                opt_level='O1' if args.fp16 else 'O0'
+            )
+            self.decoder, self.optimizer_dec = apex.amp.initialize(
+                self.decoder,
+                self.optimizer_dec,
+                opt_level='O1' if args.fp16 else 'O0'
+            )
+
         self.criterion = LabelSmoothing(config.vocab_size, 0.1).to(config.device)
 
         if os.path.isfile(config.model_path):
@@ -213,6 +226,8 @@ class Trainer(object):
             self.decoder.load_state_dict(data['decoder'])
             self.optimizer_enc.load_state_dict(data['optimizer_enc'])
             self.optimizer_dec.load_state_dict(data['optimizer_dec'])
+            if self.config.fp16:
+                apex.amp.load_state_dict(data['amp'])
             print(f'load model from {config.model_path}')
 
         self.start_time = time.time()
@@ -231,6 +246,7 @@ class Trainer(object):
             'decoder': self.decoder.state_dict(),
             'optimizer_enc': self.optimizer_enc.state_dict(),
             'optimizer_dec': self.optimizer_dec.state_dict(),
+            'amp': apex.amp.state_dict() if self.config.fp16 else None,
         }
         torch.save(data, self.config.model_path)
         print(f'save model to {self.config.model_path}')
@@ -310,17 +326,20 @@ class Trainer(object):
             (x, y) = data
 
         scores = self.__predict(x, y, True)
-
-        self.optimizer_enc.zero_grad()
-        self.optimizer_dec.zero_grad()
-
         nwords = (y[:, 1:] != PAD_ID).sum().item()
-
         loss = self.criterion(scores, y[:, 1:], nwords)
-        loss.backward()
 
-        self.optimizer_enc.step()
-        self.optimizer_dec.step()
+        optimizers = [self.optimizer_enc, self.optimizer_dec]
+
+        if self.config.fp16:
+            with apex.amp.scale_loss(loss, optimizers) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
+
+        for optimizer in optimizers:
+            optimizer.step()
+            optimizer.zero_grad()
 
         self.stats['loss'] = loss.item()
         self.stats['sentences'] += x.size(0)
@@ -508,6 +527,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_test', action='store_true', help='training copy task with random value')
     parser.add_argument('--eval_only', action='store_true', help='execute evaluation only')
     parser.add_argument('--epochs_by_eval', type=int, default=5, help='evaluate by every this epochs ')
+    parser.add_argument('--fp16', action='store_true', help='run model with float16')
     args = parser.parse_args()
     print(args)
 
