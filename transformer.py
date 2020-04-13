@@ -513,7 +513,6 @@ if __name__ == '__main__':
     parser.add_argument('--tgt', default='en', help='target language')
     parser.add_argument('--epochs', type=int, default=10, help='epoch count')
     parser.add_argument('--batch_size', type=int, default=2, help='size of batch')
-    parser.add_argument('--log_dir', default='default', help='name of log dir')
     parser.add_argument('--log_interval', type=int, default=5, help='step num to display log')
     parser.add_argument('--vocab_size', type=int, default=8, help='vocabulary size for copy task')
     parser.add_argument('--n_layers', type=int, default=3, help='number of layers')
@@ -522,12 +521,12 @@ if __name__ == '__main__':
     parser.add_argument('--dim', type=int, default=8, help='dimention of word embeddings')
     parser.add_argument('--dropout', type=int, default=0.1, help='rate of dropout')
     parser.add_argument('--warmup_steps', type=int, default=4000, help='adam lr increases until this steps have passed')
-    parser.add_argument('--model', default='model.pth', help='file to save model parameters')
     parser.add_argument('--generate_test', action='store_true', help='only generate translated sentences')
     parser.add_argument('--train_test', action='store_true', help='training copy task with random value')
     parser.add_argument('--eval_only', action='store_true', help='execute evaluation only')
     parser.add_argument('--epochs_by_eval', type=int, default=5, help='evaluate by every this epochs ')
     parser.add_argument('--fp16', action='store_true', help='run model with float16')
+    parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
     args = parser.parse_args()
     print(args)
 
@@ -537,8 +536,8 @@ if __name__ == '__main__':
 
     args.device_name = device_name
     args.device = device
-    args.model_path = f'{args.dataroot}/{args.model}'
-    args.tensorboard_log_dir = f'{args.dataroot}/runs/{args.log_dir}'
+    args.model_path = f'{args.dataroot}/{args.name}.pth'
+    args.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
     os.makedirs(args.tensorboard_log_dir, exist_ok=True)
 
     trainer = Trainer(args)
