@@ -431,13 +431,15 @@ class Trainer(object):
         loss = xe_loss / n_words if n_words > 0 else 1e9
         ppl = np.exp(loss)
         acc = 100. * n_valid / n_words if n_words > 0 else 0.
+
         bleu = corpus_bleu(refs, hyps)
 
         if epoch is not None:
-            self.writer.add_scalar('loss/eval', loss, epoch)
-            self.writer.add_scalar('ppl/eval', ppl, epoch)
-            self.writer.add_scalar('acc/eval', acc, epoch)
-            self.writer.add_scalar('bleu/eval', bleu, epoch)
+            current_time = time.time()
+            self.writer.add_scalar('loss/eval', loss, epoch, current_time)
+            self.writer.add_scalar('ppl/eval', ppl, epoch, current_time)
+            self.writer.add_scalar('acc/eval', acc, epoch, current_time)
+            self.writer.add_scalar('bleu/eval', bleu, epoch, current_time)
 
         print('ppl: {}'.format(ppl))
         print('acc: {}'.format(acc))
