@@ -240,13 +240,22 @@ class Trainer(object):
 
         self.writer = SummaryWriter(log_dir=config.tensorboard_log_dir)
 
-    def save(self):
+    def save(self, epoch):
         data = {
             'encoder': self.encoder.state_dict(),
             'decoder': self.decoder.state_dict(),
             'optimizer_enc': self.optimizer_enc.state_dict(),
             'optimizer_dec': self.optimizer_dec.state_dict(),
             'amp': apex.amp.state_dict() if self.config.fp16 else None,
+            'batch_size': self.config.batch_size,
+            'vocab_size': self.config.vocab_size,
+            'n_layers': self.config.n_layers,
+            'n_heads': self.config.n_heads,
+            'n_words': self.config.n_words,
+            'dim': self.config.dim,
+            'fp16': self.config.fp16,
+            'name': self.config.name,
+            'last_epoch': epoch,
         }
         torch.save(data, self.config.model_path)
         print(f'save model to {self.config.model_path}')
@@ -539,6 +548,20 @@ if __name__ == '__main__':
     args.device_name = device_name
     args.device = device
     args.model_path = f'{args.dataroot}/{args.name}.pth'
+
+    start_epoch = 0
+    if os.path.isfile(args.model_path):
+        loaded = torch.load(args.model_path, map_location=device_name)
+        args.batch_size = loaded['batch_size']
+        args.vocab_size = loaded['vocab_size']
+        args.n_layers = loaded['n_layers']
+        args.n_heads = loaded['n_heads']
+        args.n_words = loaded['n_words']
+        args.dim = loaded['dim']
+        args.fp16 = loaded['fp16']
+        args.name = loaded['name']
+        start_epoch = loaded['last_epoch'] + 1
+
     args.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
     os.makedirs(args.tensorboard_log_dir, exist_ok=True)
 
@@ -554,18 +577,19 @@ if __name__ == '__main__':
         trainer.evaluate()
         sys.exit()
 
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch, start_epoch + args.epochs):
+        print(epoch)
         if args.train_test:
             for i in range(100):
                 trainer.step()
                 trainer.step_end(i)
-            trainer.save()
+            trainer.save(epoch)
             continue
 
         trainer.train()
 
         if epoch % args.epochs_by_eval == 0:
             trainer.evaluate(epoch)
-            trainer.save()
+            trainer.save(epoch)
 
 
