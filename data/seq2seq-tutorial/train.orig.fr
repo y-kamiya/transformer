@@ -1,0 +1,1100 @@
+Va !
+Cours !
+Courez !
+Ça alors !
+Au feu !
+À l'aide !
+Saute.
+Ça suffit !
+Stop !
+Arrête-toi !
+Attends !
+Attendez !
+Je comprends.
+J'essaye.
+J'ai gagné !
+Je l'ai emporté !
+Oh non !
+Attaque !
+Attaquez !
+Santé !
+À votre santé !
+Merci !
+Lève-toi.
+J'ai pigé !
+Compris !
+Pigé ?
+Compris ?
+T'as capté ?
+Monte.
+Montez.
+Serre-moi dans tes bras !
+Serrez-moi dans vos bras !
+Je suis tombée.
+Je suis tombé.
+Je sais.
+Je suis parti.
+Je suis partie.
+J'ai perdu.
+J'ai 19 ans.
+Je vais bien.
+Ça va.
+Écoutez !
+Impossible !
+En aucun cas.
+C'est hors de question !
+Il n'en est pas question !
+C'est exclu !
+En aucune manière !
+Hors de question !
+Vraiment ?
+Vrai ?
+Ah bon ?
+Merci !
+On essaye.
+Nous avons gagné.
+Nous gagnâmes.
+Nous l'avons emporté.
+Nous l'emportâmes.
+Demande à Tom.
+Fantastique !
+Sois calme !
+Soyez calme !
+Soyez calmes !
+Sois détendu !
+Sois juste !
+Soyez juste !
+Soyez justes !
+Sois équitable !
+Soyez équitable !
+Soyez équitables !
+Sois gentil.
+Sois gentil !
+Sois gentille !
+Soyez gentil !
+Soyez gentille !
+Soyez gentils !
+Soyez gentilles !
+Dégage !
+Appelle-moi !
+Appellez-moi !
+Appelle-nous !
+Appelez-nous !
+Entrez !
+Entre.
+Entre !
+Entrez !
+Allez !
+Allez !
+Viens !
+Venez !
+Laisse tomber !
+Laissez tomber !
+Laisse-le tomber !
+Laissez-le tomber !
+Sortez !
+Sors !
+Sortez !
+Sors.
+Casse-toi.
+Dégage !
+Pars !
+Va te faire foutre !
+Pars !
+Dégage !
+Fous le camp !
+Pars d'ici.
+Va t'en !
+Disparais !
+Allez-vous en !
+Va doucement !
+Allez doucement !
+À la revoyure.
+Attends un peu !
+Attendez un peu !
+Tiens bon !
+Tenez bon !
+Il laissa tomber.
+Il a laissé tomber.
+Il court.
+Aide-moi !
+Aide-moi.
+Aidez-moi.
+Aidez-nous !
+Aide-nous !
+Ne bouge plus !
+Ne quittez pas.
+Je suis du même avis.
+J'essayai.
+J'ai essayé.
+J'ai tenté.
+J'irai.
+Je suis gras.
+Je suis gros.
+Je suis en forme.
+Je suis touché !
+Je suis touchée !
+Je suis malade.
+Je suis triste.
+Je suis timide.
+Je suis mouillé.
+Je suis mouillée.
+C'est bibi !
+Joignez-vous.
+Joignez-vous à nous.
+Garde-le !
+Gardez-le !
+Embrasse-moi.
+Embrassez-moi.
+Moi aussi.
+Ouvre-moi !
+Ouvre.
+Parfait !
+À plus.
+Montre-moi !
+Montrez-moi !
+Taisez-vous !
+Ferme-la !
+Tais-toi !
+Ferme-la !
+La ferme !
+À plus tard !
+Prends-le !
+Prenez-le !
+Dis-moi !
+Dites-moi !
+Tom a gagné.
+Réveille-toi !
+Réveille-toi !
+Réveillez-vous !
+Réveille-toi !
+Réveillez-vous !
+Lave-toi !
+Lavez-vous !
+Nous savons.
+Nous perdîmes.
+Nous avons perdu.
+Nous fûmes battus.
+Nous fûmes battues.
+Nous fûmes défaits.
+Nous fûmes défaites.
+Nous avons été défaits.
+Nous avons été défaites.
+Nous avons été battus.
+Nous avons été battues.
+Qui a gagné ?
+Qui l'a emporté ?
+Tu cours.
+Suis-je gros ?
+Suis-je grosse ?
+Recule !
+Reculez.
+Retire-toi !
+Retirez-vous.
+Sois un homme !
+Soyez un homme !
+Sois calme !
+Soyez calme !
+Soyez calmes !
+Aucune idée.
+J'en sais foutre rien.
+Appelle Tom.
+Appelez Tom.
+Courage !
+Détends-toi !
+Menottez-le.
+Avance !
+Avancez !
+Continue à rouler !
+Continuez à rouler !
+Lâche-toi !
+Descends !
+Descendez !
+Lâche-toi !
+Lâchez-vous !
+Va voir ailleurs si j'y suis !
+Dégage !
+Va au diable !
+Sois réaliste !
+Vas-y.
+Poursuis !
+Passe devant !
+Vas-y !
+Bien joué !
+Bon boulot !
+Beau travail !
+Attrape-le.
+Attrapez-le.
+Amuse-toi bien !
+Amusez-vous bien !
+Il essaye.
+Il est mouillé.
+Salut, les mecs !
+Comme c'est mignon !
+Quelle profondeur ?
+Comme c'est chouette !
+Comme c'est gentil !
+C'est du joli !
+Comme c'est agréable !
+Fais-moi rire.
+Dépêche-toi.
+Grouille !
+Pressez-vous !
+Fiça !
+Je suis gras.
+Je m'en suis bien sorti.
+Je m'en suis bien sortie.
+Je l'ai fait.
+C'est moi qui l'ai fait.
+J'ai oublié.
+J'ai compris.
+J'ai compris.
+J'ai capté.
+Je téléphonai.
+J'ai téléphoné.
+Je refuse.
+Je le refuse.
+Je l'ai vu.
+Je l’ai vu.
+Je suis resté.
+Je suis restée.
+Je l'utilise.
+J'en fais usage.
+Je m'en sers.
+Je paierai.
+J'essaierai.
+Je suis revenu.
+Me revoilà.
+Je suis chauve.
+Je suis occupé.
+Je suis occupée.
+Je suis calme.
+J'ai froid.
+J'en ai fini.
+Tout va bien.
+Je vais bien.
+Ça va.
+Je suis libre !
+Je suis libre.
+Je suis disponible.
+Je suis repu !
+Je suis rassasié !
+Je suis content.
+Je suis chez moi.
+Je suis en retard.
+Je suis paresseux.
+Je suis fainéant.
+Je suis paresseuse.
+Je suis fainéante.
+Je vais bien.
+Je me porte bien.
+Je suis en sécurité.
+Je suis malade.
+J'en suis certain.
+Je suis certain.
+J'en suis sûr.
+J'en suis sûre.
+Je suis grande.
+Je suis mince.
+Je suis ordonné.
+Je suis ordonnée.
+Je suis laid.
+Je suis laide.
+Je suis faible.
+Je vais bien.
+Je me porte bien.
+J'ai gagné.
+Je l'ai emporté.
+Elle marche.
+Ça fonctionne.
+C'est le sien.
+C'est la sienne.
+C'est nouveau.
+C'est neuf.
+C'est bizarre.
+C’est triste.
+Défense d'entrer.
+N'entrez pas.
+Laisse tomber !
+Laissez tomber !
+Laissez-moi !
+Laisse-nous !
+Laissez-nous !
+Allons-y !
+Allons !
+Allons-y !
+Attention !
+Épouse-moi !
+Épousez-moi !
+Puis-je partir ?
+Puis-je y aller ?
+Puis-je m'y rendre ?
+Elle est venue.
+Elle est morte.
+Elle court.
+Assieds-toi !
+Asseyez-vous !
+Assieds-toi ici.
+Asseyez-vous ici.
+Parle plus fort !
+Parlez plus fort !
+Arrête Tom.
+Stoppez Tom.
+Génial !
+Excellent !
+Formidable !
+Ils gagnèrent.
+Elles gagnèrent.
+Ils ont gagné.
+Elles ont gagné.
+Tom est venu.
+Tom est mort.
+Tom est parti.
+Tom partit.
+Tom a perdu.
+Trop tard.
+Faites-moi confiance.
+Fais-moi confiance.
+Fais un effort.
+Essaies-en !
+Essayez-en !
+Essaie ceci !
+Essayez ceci !
+Utilise ceci.
+Utilisez ceci.
+Emploie ceci !
+Employez ceci !
+Avertis Tom.
+Préviens Tom.
+Regarde-moi !
+Regardez-moi !
+Regardez-nous !
+Regarde-nous !
+Nous sommes d'accord.
+Nous irons.
+Pour quoi faire ?
+À quoi bon ?
+Qu'est-ce qu'on s'est marrés !
+Qu'est-ce qu'on s'est marrées !
+Qui est mort ?
+Qui est-il ?
+Écris-moi !
+Écrivez-moi !
+Après vous.
+En joue ! Feu !
+Suis-je en retard ?
+Répondez-moi.
+Assieds-toi !
+Asseyez-vous !
+Les oiseaux volent.
+À tes souhaits !
+Appelle à la maison !
+Calmez-vous !
+Calme-toi.
+Pouvons-nous partir ?
+Pouvons-nous nous en aller ?
+Pouvons-nous y aller ?
+Rattrape-le.
+Reviens !
+Revenez !
+Viens ici.
+Venez là.
+Viens !
+Venez !
+Venez ici !
+Viens chez nous !
+Venez chez nous !
+Viens chez moi !
+Venez chez moi !
+Viens bientôt !
+Venez bientôt !
+Calmez-vous !
+Ai-je gagné ?
+L'ai-je emporté ?
+Est-ce moi qui ai gagné ?
+Des chiens aboient.
+Les chiens aboient.
+Ne demande pas !
+Ne pleure pas !
+Ne meurs pas !
+Ne mourez pas !
+Ne mens pas.
+Ne courez pas.
+Ne cours pas.
+Excuse-moi.
+Fantastique !
+Sens ça !
+Sentez ça !
+Touche ça !
+Touchez ça !
+Suis-moi.
+Suis-nous !
+Suivez-nous !
+Oublie !
+Oublie-le !
+Oubliez !
+Oubliez-le !
+Laisse tomber.
+Oublie.
+Trouve un emploi !
+Trouve un boulot !
+Trouvez un emploi !
+Trouvez un boulot !
+Prépare-toi.
+Préparez-vous.
+Va le chercher !
+Allez le chercher !
+Entrez !
+Va au lit !
+Allez au lit !
+Bonne chance !
+Bonne chance.
+Attrape ça !
+Attrapez ça !
+Saisis-toi de ça !
+Saisissez-vous de ça !
+Attrape ça !
+Attrapez ça !
+Pas touche !
+Il est malade.
+Il est vieux.
+Il est DJ.
+Il est bon.
+Il est paresseux.
+Il est riche.
+Me voici.
+Voilà cinq dollars.
+Halte au feu !
+Cessez le feu !
+Tiens ça !
+Tenez ça !
+Tenez ceci !
+Tiens ceci !
+C'est affreux !
+Comment Tom va-t-il ?
+Comment va Tom ?
+Je suis occupé.
+Je suis calme.
+J'ai froid.
+Je suis bon.
+Je suis ici.
+Je suis paresseux.
+Je suis fainéant.
+Je suis paresseuse.
+Je suis fainéante.
+Je vais bien.
+Je suis malade.
+Je suis sûr.
+Je suis certain.
+Je suis faible.
+Je vous en prie.
+Je vous en conjure.
+Je vous en supplie.
+Je te prie.
+Je sais courir.
+Je sais skier.
+J'eus un mouvement de recul.
+J'ai eu un mouvement de recul.
+Je suis rentré en moi-même.
+J'abandonne.
+Je me suis mis à avoir chaud.
+Je me suis mise à avoir chaud.
+Je me suis amusé.
+Je me suis amusée.
+Je me suis marré.
+Je me suis marrée.
+Je déteste ça.
+J'espère bien.
+Je le savais.
+J'aime ça.
+Je l’ai perdu.
+J'adore ça !
+J'adore ça !
+Je suis sérieux !
+Je suis sérieux.
+Je dois y aller.
+Il faut que j'y aille.
+Il me faut y aller.
+Il me faut partir.
+Il me faut m'en aller.
+Je dois partir.
+Je dois m'en aller.
+Il faut que je m'en aille.
+J'en ai besoin.
+Il me le faut.
+J'ai remarqué.
+Je le promets.
+J'ai dit non.
+Je l'ai dit.
+Je l'ai vu.
+Je l’ai vu.
+Je le vis.
+J'en ai vu une.
+J'en ai vu un.
+Je vous vis.
+Je te vis.
+Je t'ai vue.
+Je t'ai vu.
+Je vous ai vues.
+Je vous ai vus.
+Je vous ai vue.
+Je vous ai vu.
+Je vois Tom.
+J'ai trébuché.
+J'ai plané.
+Je le veux.
+J'étais nouveau.
+J'étais nouvelle.
+J'irai.
+Je me suis réveillé.
+Je me suis éveillé.
+Je serais d'accord.
+Je partirais.
+J'appellerai.
+Je cuisinerai.
+J'aiderai.
+Je vivrai.
+J'obéirai.
+Je ferai mon sac.
+Je ferai ma valise.
+Je plierai mes gaules.
+Je passerai.
+J'abandonnerai.
+Je chanterai.
+Je nagerai.
+J'attendrai.
+Je marcherai.
+Je vais travailler.
+Je travaillerai.
+Je suis flic.
+Je suis un homme.
+Je suis seule.
+Je suis seul.
+Je suis armé.
+Je suis armée.
+Je suis réveillé.
+Je suis aveugle.
+Je suis fauché.
+Je suis fou.
+Je suis folle.
+Je suis guéri.
+Je suis guérie.
+Je suis saoul.
+Je suis soûl.
+Je suis ivre.
+Je me meurs.
+Je suis en avance.
+Je suis en premier.
+Je suis difficile.
+Je suis tatillon.
+Je suis tatillonne.
+Je pars maintenant.
+Je me tire.
+J’y vais.
+Je pars.
+Je suis loyal.
+Je suis loyale.
+Je suis veinard.
+Je suis veinarde.
+J'ai du pot.
+Je suis chanceux.
+Je suis chanceuse.
+Je suis en train de mentir.
+Je suis tranquille.
+Je suis prête !
+Je suis prêt !
+Je suis prêt.
+J'ai raison.
+Je suis sobre.
+Excuse-moi.
+Désolé.
+Désolé !
+Je suis désolé.
+Je suis désolée.
+Je suis coincée.
+Je suis timide.
+Je suis fatigué !
+Je suis dur.
+Je suis dure.
+Je suis dur à cuire.
+Je suis dure à cuire.
+Je suis à toi.
+Je suis à vous.
+J'ai perdu.
+Est-ce que Tom va bien ?
+Tom va-t-il bien ?
+C'est grave ?
+Est-ce éloigné ?
+Est-ce loin ?
+Est-ce toi ?
+Est-ce vous ?
+Est-ce que c'est vous ?
+Ça a échoué.
+Il a neigé.
+Ça sent mauvais.
+Ça pue.
+Ça a fonctionné.
+Ça a marché.
+Il est trois heures et demie.
+Il fait froid.
+C'est sombre.
+Elle est morte.
+C'est mort.
+Il est mort.
+C'est fait.
+C'est de la nourriture.
+C'est gratuit.
+C'est le sien.
+C'est la sienne.
+Il est tard.
+C'est perdu.
+C'est ouvert.
+C'est du sable.
+C'est vrai !
+C'est du boulot.
+Ainsi soit-il.
+Laisse faire.
+Laisse-moi partir !
+Laissez-moi partir !
+Lâche-moi !
+Laisse-moi m'en aller !
+Laissez-moi m'en aller !
+Laissez-moi y aller !
+Laisse-moi y aller !
+Laisse-moi partir !
+Laissez-moi partir !
+Laisse-moi m'en aller !
+Laissez-moi m'en aller !
+Laissez-moi rentrer.
+Laissez-moi entrer.
+Demandons.
+Voyons voir !
+Reste allongé, immobile !
+Reste allongée, immobile !
+Restez allongé, immobile !
+Restez allongée, immobile !
+Restez allongés, immobiles !
+Restez allongées, immobiles !
+Échauffe-toi !
+Échauffez-vous !
+Détends-toi !
+Laisse-toi aller !
+Laissez-vous aller !
+Joli coup !
+Pour sûr.
+Mais ouais !
+Bien sûr.
+Pour sûr.
+Je vous en prie !
+Je t'en prie !
+Pardon ?
+Je vous demande pardon ?
+Plaît-il ?
+Lis ceci.
+Dis bonjour.
+Voyez ci-dessus.
+Vraiment ?
+Est-ce sérieux ?
+Sérieusement ?
+Elle pleurait.
+Elle pleura.
+Elle a essayé.
+Elle marche.
+Elle est chaude.
+Elle est très attirante.
+Signe ici.
+Signez ici.
+Ralentis !
+Ralentissez !
+Reste en arrière !
+Restez en arrière !
+Restez calme.
+Reste calme.
+Garde ton calme.
+Garde ton sang-froid.
+Reste tranquille.
+Reste baissé.
+Restez baissé.
+Reste mince !
+Arrêtez !
+Arrêtez ça !
+Arrête ça !
+Prends soin de toi.
+Prenez soin de vous.
+Prends le mien.
+Prends la mienne.
+Prenez le mien.
+Prenez la mienne.
+Prends les miens.
+Prends les miennes.
+Prenez les miens.
+Prenez les miennes.
+Prends ça.
+Prenez ça.
+Merci !
+C'est ça.
+Ils sont tombés.
+Elles sont tombées.
+Ils sont partis.
+Elles sont parties.
+Ils ont menti.
+Elles ont menti.
+Ils ont perdu.
+Elles ont perdu.
+Ils nageaient.
+Elles nageaient.
+Ils nagèrent.
+Elles nagèrent.
+Tom tricote.
+Tom sait.
+Tom a parlé.
+Tom est gros.
+Essaie encore.
+Essayez de nouveau.
+Essaie de nouveau.
+Essaie-le !
+Tourne à gauche.
+Attends ici.
+Attends là.
+Attendez ici.
+Attendez là.
+Attention !
+Faites attention !
+Fais attention !
+Nous sommes tombés d'accord.
+Nous avons réussi !
+Nous avons réussi !
+Nous l'avons fait.
+Nous avons oublié.
+Nous l'avons vu.
+Nous l'avons vue.
+Nous discutâmes.
+Nous avons discuté.
+Nous nous sommes entretenus.
+Nous nous sommes entretenues.
+Nous nous entretînmes.
+Nous attendîmes.
+Nous avons attendu.
+Nous essayerons.
+Nous tenterons.
+Nous l'emporterons.
+Nous gagnerons.
+Nous avons chaud.
+Nous sommes tristes.
+Nous sommes timides.
+Bien vu !
+Bien cuit !
+À la bonne heure !
+Pas mal !
+Quoi d’autre ?
+Quoi d'autre ?
+Quoi de beau ?
+Qui s'en préoccupe ?
+Qui s'en soucie ?
+À qui ceci importe-t-il ?
+Qui est-ce ?
+Qui est-il ?
+Qui est-ce ?
+Qui est-il ?
+Qui sait ?
+Qui a parlé ?
+Qui ira ?
+Qui est malade ?
+Magnifique !
+Écrivez à Tom.
+Tu conduis.
+Toi, conduis !
+Vous conduisez.
+Espèce d'imbécile !
+Espèce d'idiot !
+Tu commences.
+Vous commencez.
+Tu as essayé.
+Vous avez essayé.
+Tout le monde à bord!
+Suis-je clair ?
+Suis-je claire ?
+Suis-je en train de mourir ?
+Suis-je en train de trépasser ?
+Suis-je en avance ?
+Vous me mettez à la porte ?
+Suis-je le premier ?
+Suis-je la première ?
+Suis-je engagé ?
+Suis-je engagée ?
+Ai-je raison ?
+Suis-je dans le vrai ?
+Me trompé-je ?
+Ai-je tort ?
+Est-ce que je me trompe ?
+Est-ce que tu vas bien ?
+Es-tu levé ?
+Es-tu levée ?
+Êtes-vous levé ?
+Êtes-vous levée ?
+Êtes-vous levés ?
+Êtes-vous levées ?
+Es-tu debout ?
+Êtes-vous debout ?
+Demandez à n'importe qui.
+Demande à n'importe qui.
+Demande à quiconque !
+Demande alentour !
+Demandez alentour !
+Sois prudent !
+Sois prudente !
+Soyez prudent !
+Soyez prudente !
+Soyez prudents !
+Soyez prudentes !
+Sois satisfait !
+Sois satisfaite !
+Soyez satisfait !
+Soyez satisfaite !
+Soyez satisfaits !
+Soyez satisfaites !
+Soyez sérieux !
+Soyez sérieuse !
+Soyez sérieuses !
+Sois sérieux !
+Sois sérieuse !
+Les oiseaux chantent.
+Santé !
+Puis-je venir ?
+Puis-je aider ?
+Puis-je rester ?
+Vérifie ça.
+Regarde ça.
+Choisis-en un.
+Choisis-en une.
+Joignez-vous à nous.
+Entre donc !
+Entre.
+Viens vite !
+Jouis vite !
+Venez à moi.
+Venez à nous.
+Arrête !
+Arrêtez !
+Assez !
+Avons-nous gagné ?
+Est-ce que je pue ?
+Je vous en prie, entrez !
+Les hommes pleurent-ils ?
+Te tracasse pas.
+Vous tracassez pas.
+Ne te tracasse pas.
+Ne vous tracassez pas.
+Ne bouge pas !
+Ne bougez pas !
+Ne bougez pas.
+Ne bouge pas.
+Ne te précipite pas.
+Ne vous précipitez pas.
+Ne parle pas !
+Ne parlez pas !
+N'attends pas !
+N'attendez pas !
+Le devoir m'appelle.
+Le plein.
+Trouve un emploi !
+Trouve un boulot !
+Suis-le !
+Suivez-le !
+Oublie-le.
+Oubliez-le.
+Pardonnez-moi.
+Achète-toi une vie !
+Va au lit !
+Au lit !
+Allez au lit !
+Laisse tomber.
+Abandonne !
+Va t'échauffer !
+Allez vous échauffer !
+Il a cédé.
+Il céda.
+Il a raccroché.
+Il raccrocha.
+Il est DJ.
+Il a à faire.
+Il est ici !
+Il est gentil.
+Il est en retard.
+Il est fainéant.
+Il est paresseux.
+Il est pauvre.
+Il est malade.
+Il a réussi.
+Il est Suisse.
+Il est Helvète.
+Il est ruiné.
+Il est fauché.
+Il est ivre.
+Il est soûl.
+Il est intelligent.
+Il est ici !
+Le voilà.
+Tenez.
+Le voici.
+C'est parti !
+On est partis !
+Tiens-toi tranquille !
+Tenez-vous tranquille !
+Comme c'est charmant !
+Comment va le travail ?
+Dépêche-toi d'aller chez toi !
+Dépêchez-vous d'aller chez vous !
+Je suis un homme.
+Je suis humain.
+Je suis prêt.
+J'ai raison.
+Je suis désolé.
+Je suis désolée.
+Je suis fatigué !
+Je suis crevé.
+Je l'ai cassé.
+Je l'ai cassée.
+Je l'ai construit.
+Je l'ai construite.
+Je peux venir.
+Je sais cuisiner.
+Je peux sauter.
+Je sais lire.
+Je peux lire.
+Je sais chanter.
+Je peux rester.
+Je sais nager.
+Je peux attendre.
+Je peux marcher.
+Je ne peux pas y aller.
+Je ne peux pas m'y rendre.
+Je ne peux pas partir.
+J'ai fait cela.
+C'est moi qui l'ai fait.
+Je ne suis pas d'accord.
+Je me fais vraiment du souci.
+J'en doute.
+Je mange ici.
+Je l'envie.
+Je vous envie.
+Je t'envie.
+Je me sens mal.
+Je me sens vieux.
+Je me sens vieille.
+Je me suis senti mal.
+Je me suis senti mal.
+Je me sentais malade.
+Je me sentis malade.
+J'ai ressenti de la tristesse.
+Je l'ai réparé.
+Je l'ai réparée.
+Je la réparai.
+Je le réparai.
+Je l'ai trouvé.
+Je le trouvai.
+Je suis devenu occupé.
+Je suis devenu occupée.
+Je me suis perdu.
+Je suis devenu malade.
+Je suis devenue malade.
+Je le suppose.
+J'imagine.
+J'ai reçu de l'aide.
+Je te déteste.
+Je te hais.
+J'en ai un.
+J'en ai une.
+J'ai gagné.
+Je l'ai emporté.
+Je l'aide.
+Je n'espère pas.
+J'espère que non.
+Je connais la RCP.
+Je la connais.
+Je le connais.
+J'apprécie l'art.
+Je l'apprécie.
+Je l'aime bien.
+J'aime le thé.
+Tu me plais.
+Vous me plaisez.
+Je t'aime bien.
+J'ai aimé ça.
+Je l'ai apprécié.
+J'aime Tom.
+J'adore le thé.
+Je t'aime !
+Je t'adore.
+J'adorais ça.
+J'ai préparé du thé.
+J'en ai fait deux.
+J'en ai confectionné deux.
+Je les ai rencontrés.
+Je les ai rencontrées.
+Je les rencontrai.
+Il me faut courir.
+Je dois courir.
+J'ai besoin d'air.
+Il me faut de l'air.
+J'ai besoin de glace.
+J'ai besoin de toi.
+J'ai besoin de vous.
+J'ai paniqué.
+J'ai promis.
+Je me suis enfuit.
+J'ai couru à la maison.
+Je m'en souviens.
+Je me le rappelle.
+Je m'en rappelle.
+J'ai dit oui.
+Je m'assis.
+J'ai vu cela.
+Je les ai vues.
+Je les ai vus.
+Je les vis.
+J'ai crié.
+Je les vois.
+J'ai survécu.
+J'ai vomi.
+J'ai essayé.
+Je l'ai essayé.
+J'utilise cela.
+J'en veux un !
+J'en veux une !
+J'en veux un !
+J'en veux une !
+J'ai envie de toi.
+Je te veux !
+Je vous veux !
+Je n'étais pas là.
+J'étais occupée.
+Je fus bon.
+J'ai été bon.
+J'ai été bonne.
+Je fus bonne.
+J'étais en retard.
+J'ai été en retard.
+J'étais perdu.
+J'étais perdue.
+J'ai été malade.
+J'étais malade.
+J'essaierai.
+Je fais de l'exercice.
+Je l'ai écrit.
+C'est moi qui l'ai écrit.
+J'accepterais.
+Je vérifierai.
+Je vais le faire.
+Je le ferai.
+Je conduirai.
+J'entrerai.
+Je me dépêcherai.
+Je partirai.
+Je tirerai.
+Je resterai debout.
+Je commencerai.
+Je suis français.
+Je suis Coréen.
+Je suis un héros.
+Je suis un menteur.
