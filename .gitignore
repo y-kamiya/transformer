@@ -1,3 +1,5 @@
 venv*
 *.pth
 *.model
+runs
+.DS_Store
