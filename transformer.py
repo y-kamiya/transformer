@@ -514,7 +514,40 @@ class MTDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return (self.data[self.config.src][idx], self.data[self.config.tgt][idx])
 
+class Config():
+    def __init__(self, args):
+        for key in args.__dict__:
+            setattr(self, key, getattr(args, key))
+        
+        is_cpu = args.cpu or not torch.cuda.is_available()
+        self.device_name = "cpu" if is_cpu else "cuda:0"
+        self.device = torch.device(self.device_name)
 
+        self.model_path = f'{args.dataroot}/{args.name}.pth'
+        self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
+
+        self.start_epoch = 0
+        if os.path.isfile(self.model_path):
+            loaded = torch.load(self.model_path, map_location=self.device_name)
+            self.__set_from_model('batch_size', loaded)
+            self.__set_from_model('vocab_size', loaded)
+            self.__set_from_model('n_layers', loaded)
+            self.__set_from_model('n_heads', loaded)
+            self.__set_from_model('n_words', loaded)
+            self.__set_from_model('dim', loaded)
+            self.__set_from_model('fp16', loaded)
+            self.__set_from_model('name', loaded)
+            self.start_epoch = loaded['last_epoch'] + 1
+
+    def __set_from_model(self, key, loaded):
+        assert hasattr(self, key), f'{key} is not found in config'
+        assert key in loaded, f'{key} is not found in loaded model'
+
+        config_value = getattr(self, key)
+        loaded_value = loaded[key]
+        if config_value != loaded_value:
+            print('{} is overwritten by loaded value {}'.format(key, loaded_value))
+            setattr(self, key, loaded_value)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=True)
@@ -539,47 +572,26 @@ if __name__ == '__main__':
     parser.add_argument('--fp16', action='store_true', help='run model with float16')
     parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
     args = parser.parse_args()
-    print(args)
 
-    is_cpu = args.cpu or not torch.cuda.is_available()
-    device_name = "cpu" if is_cpu else "cuda:0"
-    device = torch.device(device_name)
+    config = Config(args)
+    print(config)
 
-    args.device_name = device_name
-    args.device = device
-    args.model_path = f'{args.dataroot}/{args.name}.pth'
+    os.makedirs(config.tensorboard_log_dir, exist_ok=True)
 
-    start_epoch = 0
-    if os.path.isfile(args.model_path):
-        loaded = torch.load(args.model_path, map_location=device_name)
-        args.batch_size = loaded['batch_size']
-        args.vocab_size = loaded['vocab_size']
-        args.n_layers = loaded['n_layers']
-        args.n_heads = loaded['n_heads']
-        args.n_words = loaded['n_words']
-        args.dim = loaded['dim']
-        args.fp16 = loaded['fp16']
-        args.name = loaded['name']
-        start_epoch = loaded['last_epoch'] + 1
+    trainer = Trainer(config)
 
-    args.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
-    os.makedirs(args.tensorboard_log_dir, exist_ok=True)
-
-    trainer = Trainer(args)
-
-    if args.generate_test:
-        args.src = 'en'
-        args.tgt = 'en'
+    if config.generate_test:
+        config.src = 'en'
+        config.tgt = 'en'
         trainer.generate_test()
         sys.exit()
 
-    if args.eval_only:
+    if config.eval_only:
         trainer.evaluate()
         sys.exit()
 
-    for epoch in range(start_epoch, start_epoch + args.epochs):
-        print(epoch)
-        if args.train_test:
+    for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
+        if config.train_test:
             for i in range(100):
                 trainer.step()
                 trainer.step_end(i)
@@ -588,7 +600,7 @@ if __name__ == '__main__':
 
         trainer.train()
 
-        if epoch % args.epochs_by_eval == 0:
+        if epoch % config.epochs_by_eval == 0:
             trainer.evaluate(epoch)
             trainer.save(epoch)
 
