@@ -197,6 +197,7 @@ class TransformerModel(nn.Module):
 class Trainer(object):
     def __init__(self, config):
         self.config = config
+
         self.encoder = TransformerModel(config, is_decoder=False).to(config.device)
         self.decoder = TransformerModel(config, is_decoder=True).to(config.device)
 
@@ -240,6 +241,12 @@ class Trainer(object):
 
         self.writer = SummaryWriter(log_dir=config.tensorboard_log_dir)
 
+        # dummy call to take over learning rate
+        # https://discuss.pytorch.org/t/a-problem-occured-when-resuming-an-optimizer/28822
+        if 0 < config.last_steps:
+            for _ in range(config.last_steps):
+                self.step_end(False)
+
     def save(self, epoch):
         data = {
             'encoder': self.encoder.state_dict(),
@@ -256,6 +263,7 @@ class Trainer(object):
             'fp16': self.config.fp16,
             'name': self.config.name,
             'last_epoch': epoch,
+            'last_steps': self.steps,
         }
         torch.save(data, self.config.model_path)
         print(f'save model to {self.config.model_path}')
@@ -356,9 +364,11 @@ class Trainer(object):
 
         self.writer.add_scalar('loss/train', loss, self.steps, time.time())
 
-    def step_end(self, step):
+    def step_end(self, print_log=True):
         self.steps += 1
-        self._print_log()
+
+        if print_log:
+            self._print_log()
 
         self.scheduler_enc.step()
         self.scheduler_dec.step()
@@ -400,11 +410,11 @@ class Trainer(object):
         dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size)
 
         print(f'start epoch {epoch}')
-        for i, (x, y) in enumerate(dataloader):
+        for x, y in dataloader:
             x = x.to(self.config.device)
             y = y.to(self.config.device)
             self.step((x, y))
-            self.step_end(i)
+            self.step_end()
 
     def evaluate(self, epoch=None):
         self.encoder.eval()
@@ -527,6 +537,7 @@ class Config():
         self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
 
         self.start_epoch = 0
+        self.last_steps = 0
         if os.path.isfile(self.model_path):
             loaded = torch.load(self.model_path, map_location=self.device_name)
             self.__set_from_model('batch_size', loaded)
@@ -538,6 +549,10 @@ class Config():
             self.__set_from_model('fp16', loaded)
             self.__set_from_model('name', loaded)
             self.start_epoch = loaded['last_epoch'] + 1
+            self.last_steps = loaded['last_steps']
+
+        for key in self.__dict__:
+            print('{}: {}'.format(key, getattr(self, key)))
 
     def __set_from_model(self, key, loaded):
         assert hasattr(self, key), f'{key} is not found in config'
@@ -574,7 +589,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     config = Config(args)
-    print(config)
 
     os.makedirs(config.tensorboard_log_dir, exist_ok=True)
 
@@ -592,9 +606,9 @@ if __name__ == '__main__':
 
     for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
         if config.train_test:
-            for i in range(100):
+            for _ in range(100):
                 trainer.step()
-                trainer.step_end(i)
+                trainer.step_end()
             trainer.save(epoch)
             continue
 
