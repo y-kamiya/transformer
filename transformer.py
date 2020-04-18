@@ -407,7 +407,7 @@ class Trainer(object):
 
     def train(self):
         data_train = MTDataset(args, 'train')
-        dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size)
+        dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size, shuffle=True)
 
         print(f'start epoch {epoch}')
         for x, y in dataloader:
