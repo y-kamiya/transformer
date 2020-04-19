@@ -281,24 +281,6 @@ class Trainer(object):
 
         return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=update)
 
-    def _get_batch_copy_task(self):
-        vocab_size = self.config.vocab_size
-        batch_size = self.config.batch_size
-        n_words = self.config.n_words
-
-        data = np.random.randint(PAD_ID+1, vocab_size, size=(batch_size, n_words))
-
-        min_words = 5
-        eos_indexes = np.random.randint(min_words, n_words, size=batch_size)
-        for i in range(batch_size):
-            index = eos_indexes[i]
-            data[i][index] = EOS_ID
-            data[i][index+1:] = PAD_ID
-
-        data[:, 0] = BOS_ID
-        data = torch.from_numpy(data).requires_grad_(False).to(self.config.device, dtype=torch.int)
-        return (data.clone(), data)
-
     def __generate(self, x):
         self.encoder.eval()
         self.decoder.eval()
@@ -333,14 +315,9 @@ class Trainer(object):
 
         return self.decoder.predict(dec_output)
 
-    def step(self, data=None):
+    def step(self, x, y):
         self.encoder.train()
         self.decoder.train()
-
-        if data is None:
-            x, y = self._get_batch_copy_task()
-        else:
-            (x, y) = data
 
         scores = self.__predict(x, y, True)
         nwords = (y[:, 1:] != PAD_ID).sum().item()
@@ -390,7 +367,7 @@ class Trainer(object):
         self.encoder.eval()
         self.decoder.eval()
 
-        data = MTDataset(args, 'test')
+        data = MTDataset(self.config, 'test')
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         x, _ = next(iter(dataloader))
@@ -406,21 +383,23 @@ class Trainer(object):
             # print('') 
 
     def train(self):
-        data_train = MTDataset(args, 'train')
+        data_type = 'dummy' if self.config.train_test else 'train'
+        data_train = MTDataset(self.config, data_type)
         dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size, shuffle=True)
 
         print(f'start epoch {epoch}')
         for x, y in dataloader:
             x = x.to(self.config.device)
             y = y.to(self.config.device)
-            self.step((x, y))
+            self.step(x, y)
             self.step_end()
 
     def evaluate(self, epoch=None):
         self.encoder.eval()
         self.decoder.eval()
 
-        data = MTDataset(args, 'valid')
+        data_type = 'dummy' if self.config.train_test else 'valid'
+        data = MTDataset(self.config, data_type)
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         n_words = 0
@@ -491,6 +470,10 @@ class MTDataset(torch.utils.data.Dataset):
         self.config = config
         self.data = {} 
 
+        if type == 'dummy':
+            self.__init_with_dummy()
+            return
+
         dataroot = config.dataroot
         for lang in [config.src, config.tgt]:
             path = "{}/{}.{}".format(dataroot, type, lang)
@@ -523,6 +506,26 @@ class MTDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         return (self.data[self.config.src][idx], self.data[self.config.tgt][idx])
+
+    def __init_with_dummy(self):
+        data_size = 1000
+        vocab_size = self.config.vocab_size
+        n_words = self.config.n_words
+
+        data = np.random.randint(PAD_ID+1, vocab_size, size=(data_size, n_words))
+
+        min_words = 5
+        eos_indexes = np.random.randint(min_words, n_words, size=data_size)
+        for i in range(data_size):
+            index = eos_indexes[i]
+            data[i][index] = EOS_ID
+            data[i][index+1:] = PAD_ID
+
+        data[:, 0] = BOS_ID
+        data = torch.from_numpy(data).to(self.config.device, dtype=torch.int)
+
+        self.data[self.config.src] = data.clone()
+        self.data[self.config.tgt] = data
 
 class Config():
     def __init__(self, args):
@@ -605,13 +608,6 @@ if __name__ == '__main__':
         sys.exit()
 
     for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
-        if config.train_test:
-            for _ in range(100):
-                trainer.step()
-                trainer.step_end()
-            trainer.save(epoch)
-            continue
-
         trainer.train()
 
         if epoch % config.epochs_by_eval == 0:
