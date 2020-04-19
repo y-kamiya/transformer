@@ -423,8 +423,11 @@ class Trainer(object):
             n_valid += (scores.max(2)[1] == y).sum().item()
 
             generated = self.__generate(x)
-            hyps.extend(generated[:, 1:].tolist())
-            refs.extend(y.unsqueeze(1).tolist())
+
+            assert len(generated) == len(y), 'size of generated and y are mismatched'
+            for i in range(len(generated)):
+                hyps.append([id.item() for id in generated[i, 1:] if id != PAD_ID])
+                refs.append([[id.item() for id in y[i] if id != PAD_ID]])
 
         loss = xe_loss / n_words if n_words > 0 else 1e9
         ppl = np.exp(loss)
