@@ -430,7 +430,7 @@ class Trainer(object):
         ppl = np.exp(loss)
         acc = 100. * n_valid / n_words if n_words > 0 else 0.
 
-        bleu = corpus_bleu(refs, hyps)
+        bleu = corpus_bleu(refs, hyps) * 100.
 
         if epoch is not None:
             current_time = time.time()
@@ -439,9 +439,9 @@ class Trainer(object):
             self.writer.add_scalar('acc/eval', acc, epoch, current_time)
             self.writer.add_scalar('bleu/eval', bleu, epoch, current_time)
 
-        print('ppl: {}'.format(ppl))
-        print('acc: {}'.format(acc))
-        print('bleu: {}'.format(bleu))
+        print('ppl: {:.2f}'.format(ppl))
+        print('acc: {:.2f}'.format(acc))
+        print('bleu: {:.2f}'.format(bleu))
 
 class LabelSmoothing(nn.Module):
     def __init__(self, size, smoothing):
