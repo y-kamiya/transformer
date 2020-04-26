@@ -371,16 +371,16 @@ class Trainer(object):
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         x, _ = next(iter(dataloader))
-        x = x.to(device)
+        x = x.to(self.config.device)
 
         generated = self.__generate(x)
 
         for i in range(x.size(0)):
             print(' '.join([str(id) for id in x[i].tolist()]))
             print(' '.join([str(int(id)) for id in generated[i].tolist()]))
-            # print('input : {}'.format(x[i]))
-            # print('output: {}'.format(word_ids[i])) 
-            # print('') 
+            # print('input : {}'.format(x[i].tolist()))
+            # print('output: {}'.format(generated[i].tolist()))
+            # print('')
 
     def train(self):
         data_type = 'dummy' if self.config.train_test else 'train'
