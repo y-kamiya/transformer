@@ -542,7 +542,7 @@ class Config():
         self.model_path = f'{args.dataroot}/{args.name}.pth'
         self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
 
-        self.start_epoch = 0
+        self.start_epoch = 1
         self.last_steps = 0
         if os.path.isfile(self.model_path):
             loaded = torch.load(self.model_path, map_location=self.device_name)
