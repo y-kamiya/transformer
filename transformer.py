@@ -232,6 +232,7 @@ class Trainer(object):
             print(f'load model from {config.model_path}')
 
         self.start_time = time.time()
+        self.bleu_history = []
         self.steps = 0
         self.stats = {
             'sentences': 0,
@@ -247,7 +248,7 @@ class Trainer(object):
             for _ in range(config.last_steps):
                 self.step_end(False)
 
-    def save(self, epoch):
+    def save(self, epoch, model_path):
         data = {
             'encoder': self.encoder.state_dict(),
             'decoder': self.decoder.state_dict(),
@@ -265,7 +266,7 @@ class Trainer(object):
             'last_epoch': epoch,
             'last_steps': self.steps,
         }
-        torch.save(data, self.config.model_path)
+        torch.save(data, model_path)
         print(f'save model to {self.config.model_path}')
 
     def _get_optimizer(self, model):
@@ -442,9 +443,29 @@ class Trainer(object):
             self.writer.add_scalar('acc/eval', acc, epoch, current_time)
             self.writer.add_scalar('bleu/eval', bleu, epoch, current_time)
 
+            self.__udpate_saved_model(bleu, epoch)
+
         print('ppl: {:.2f}'.format(ppl))
         print('acc: {:.2f}'.format(acc))
         print('bleu: {:.2f}'.format(bleu))
+
+    def __udpate_saved_model(self, bleu, epoch):
+        self.save(epoch, self.config.model_path)
+
+        if len(self.bleu_history) == 0:
+            self.bleu_history.append(bleu)
+            return
+
+        previous_best = self.bleu_history[0]
+        if bleu <= previous_best:
+            self.bleu_history.append(bleu)
+            return
+
+        self.bleu_history = [bleu]
+        self.save(epoch, self.config.best_model_path)
+
+    def is_early_stopping(self):
+        return self.config.early_stopping_threshold < len(self.bleu_history)
 
 class LabelSmoothing(nn.Module):
     def __init__(self, size, smoothing):
@@ -540,6 +561,7 @@ class Config():
         self.device = torch.device(self.device_name)
 
         self.model_path = f'{args.dataroot}/{args.name}.pth'
+        self.best_model_path = f'{args.dataroot}/{args.name}.best.pth'
         self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
 
         self.start_epoch = 1
@@ -592,6 +614,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs_by_eval', type=int, default=5, help='evaluate by every this epochs ')
     parser.add_argument('--fp16', action='store_true', help='run model with float16')
     parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
+    parser.add_argument('--early_stopping_threshold', type=int, default=3, help='evaluation count to early stopping')
     args = parser.parse_args()
 
     config = Config(args)
@@ -615,6 +638,9 @@ if __name__ == '__main__':
 
         if epoch % config.epochs_by_eval == 0:
             trainer.evaluate(epoch)
-            trainer.save(epoch)
+
+            if trainer.is_early_stopping():
+                print(f'early stopping epoch: {epoch}')
+                break
 
 
