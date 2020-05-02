@@ -8,6 +8,9 @@ import torch
 import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
+from nltk.translate.bleu_score import corpus_bleu
+import apex
 
 BOS_ID = 1
 EOS_ID = 2
@@ -150,8 +153,8 @@ class TransformerModel(nn.Module):
 
     def _get_mask(self, input, causal):
         device = self.config.device
-        pad_tensor = torch.empty(1).fill_(PAD_ID).expand_as(input)
-        mask = input.to(dtype=torch.int, device=device) == pad_tensor
+        pad_tensor = torch.empty(1).fill_(PAD_ID).expand_as(input).cpu()
+        mask = input.to(dtype=torch.int).cpu() == pad_tensor.cpu()
 
         if not causal:
             return mask.to(device), mask.to(device)
@@ -194,6 +197,7 @@ class TransformerModel(nn.Module):
 class Trainer(object):
     def __init__(self, config):
         self.config = config
+
         self.encoder = TransformerModel(config, is_decoder=False).to(config.device)
         self.decoder = TransformerModel(config, is_decoder=True).to(config.device)
 
@@ -203,6 +207,18 @@ class Trainer(object):
         self.optimizer_dec = self._get_optimizer(self.decoder)
         self.scheduler_dec = self._get_scheduler(self.optimizer_dec)
 
+        if self.config.fp16:
+            self.encoder, self.optimizer_enc = apex.amp.initialize(
+                self.encoder,
+                self.optimizer_enc,
+                opt_level='O1' if args.fp16 else 'O0'
+            )
+            self.decoder, self.optimizer_dec = apex.amp.initialize(
+                self.decoder,
+                self.optimizer_dec,
+                opt_level='O1' if args.fp16 else 'O0'
+            )
+
         self.criterion = LabelSmoothing(config.vocab_size, 0.1).to(config.device)
 
         if os.path.isfile(config.model_path):
@@ -211,9 +227,12 @@ class Trainer(object):
             self.decoder.load_state_dict(data['decoder'])
             self.optimizer_enc.load_state_dict(data['optimizer_enc'])
             self.optimizer_dec.load_state_dict(data['optimizer_dec'])
+            if self.config.fp16:
+                apex.amp.load_state_dict(data['amp'])
             print(f'load model from {config.model_path}')
 
         self.start_time = time.time()
+        self.bleu_history = []
         self.steps = 0
         self.stats = {
             'sentences': 0,
@@ -221,14 +240,33 @@ class Trainer(object):
             'loss': 0.0,
         }
 
-    def save(self):
+        self.writer = SummaryWriter(log_dir=config.tensorboard_log_dir)
+
+        # dummy call to take over learning rate
+        # https://discuss.pytorch.org/t/a-problem-occured-when-resuming-an-optimizer/28822
+        if 0 < config.last_steps:
+            for _ in range(config.last_steps):
+                self.step_end(False)
+
+    def save(self, epoch, model_path):
         data = {
             'encoder': self.encoder.state_dict(),
             'decoder': self.decoder.state_dict(),
             'optimizer_enc': self.optimizer_enc.state_dict(),
             'optimizer_dec': self.optimizer_dec.state_dict(),
+            'amp': apex.amp.state_dict() if self.config.fp16 else None,
+            'batch_size': self.config.batch_size,
+            'vocab_size': self.config.vocab_size,
+            'n_layers': self.config.n_layers,
+            'n_heads': self.config.n_heads,
+            'n_words': self.config.n_words,
+            'dim': self.config.dim,
+            'fp16': self.config.fp16,
+            'name': self.config.name,
+            'last_epoch': epoch,
+            'last_steps': self.steps,
         }
-        torch.save(data, self.config.model_path)
+        torch.save(data, model_path)
         print(f'save model to {self.config.model_path}')
 
     def _get_optimizer(self, model):
@@ -244,24 +282,6 @@ class Trainer(object):
 
         return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=update)
 
-    def _get_batch_copy_task(self):
-        vocab_size = self.config.vocab_size
-        batch_size = self.config.batch_size
-        n_words = self.config.n_words
-
-        data = np.random.randint(PAD_ID+1, vocab_size, size=(batch_size, n_words))
-
-        min_words = 5
-        eos_indexes = np.random.randint(min_words, n_words, size=batch_size)
-        for i in range(batch_size):
-            index = eos_indexes[i]
-            data[i][index] = EOS_ID
-            data[i][index+1:] = PAD_ID
-
-        data[:, 0] = BOS_ID
-        data = torch.from_numpy(data).requires_grad_(False).to(self.config.device, dtype=torch.int)
-        return (data.clone(), data)
-
     def __generate(self, x):
         self.encoder.eval()
         self.decoder.eval()
@@ -273,8 +293,9 @@ class Trainer(object):
         batch_size, _ = x.shape
         generated = torch.empty(batch_size, max_len).fill_(PAD_ID)
         generated[:,0] = BOS_ID
+        generated = generated.to(self.config.device)
 
-        unfinished_sents = torch.ones(batch_size)
+        unfinished_sents = torch.ones(batch_size, device=self.config.device)
 
         for i in range(1, max_len):
             dec_output = self.decoder(generated[:, :i], enc_output, src_mask, True)
@@ -287,40 +308,45 @@ class Trainer(object):
             if unfinished_sents.max() == 0:
                 break
 
-        return generated
+        return generated.to(dtype=torch.int)
 
-    def step(self, data=None):
+    def __predict(self, x, y, causal):
+        enc_output = self.encoder(x)
+        dec_output = self.decoder(y[:, :-1], enc_output, x == PAD_ID, causal)
+
+        return self.decoder.predict(dec_output)
+
+    def step(self, x, y):
         self.encoder.train()
         self.decoder.train()
 
-        if data is None:
-            x, y = self._get_batch_copy_task()
-        else:
-            (x, y) = data
-
-        enc_output = self.encoder(x)
-        dec_output = self.decoder(y[:, :-1], enc_output, x == PAD_ID, True)
-
-        gen_output = self.decoder.predict(dec_output)
-
-        self.optimizer_enc.zero_grad()
-        self.optimizer_dec.zero_grad()
-
+        scores = self.__predict(x, y, True)
         nwords = (y[:, 1:] != PAD_ID).sum().item()
+        loss = self.criterion(scores, y[:, 1:], nwords)
 
-        loss = self.criterion(gen_output, y[:, 1:], nwords)
-        loss.backward()
+        optimizers = [self.optimizer_enc, self.optimizer_dec]
 
-        self.optimizer_enc.step()
-        self.optimizer_dec.step()
+        if self.config.fp16:
+            with apex.amp.scale_loss(loss, optimizers) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
+
+        for optimizer in optimizers:
+            optimizer.step()
+            optimizer.zero_grad()
 
         self.stats['loss'] = loss.item()
         self.stats['sentences'] += x.size(0)
         self.stats['words'] += nwords
 
-    def step_end(self, step):
+        self.writer.add_scalar('loss/train', loss, self.steps, time.time())
+
+    def step_end(self, print_log=True):
         self.steps += 1
-        self._print_log()
+
+        if print_log:
+            self._print_log()
 
         self.scheduler_enc.step()
         self.scheduler_dec.step()
@@ -342,20 +368,104 @@ class Trainer(object):
         self.encoder.eval()
         self.decoder.eval()
 
-        data = MTDataset(args, 'test')
+        data = MTDataset(self.config, 'test')
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         x, _ = next(iter(dataloader))
-        x = x.to(device)
+        x = x.to(self.config.device)
 
         generated = self.__generate(x)
 
         for i in range(x.size(0)):
             print(' '.join([str(id) for id in x[i].tolist()]))
             print(' '.join([str(int(id)) for id in generated[i].tolist()]))
-            # print('input : {}'.format(x[i]))
-            # print('output: {}'.format(word_ids[i])) 
-            # print('') 
+            # print('input : {}'.format(x[i].tolist()))
+            # print('output: {}'.format(generated[i].tolist()))
+            # print('')
+
+    def train(self):
+        data_type = 'dummy' if self.config.train_test else 'train'
+        data_train = MTDataset(self.config, data_type)
+        dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size, shuffle=True)
+
+        print(f'start epoch {epoch}')
+        for x, y in dataloader:
+            x = x.to(self.config.device)
+            y = y.to(self.config.device)
+            self.step(x, y)
+            self.step_end()
+
+    def evaluate(self, epoch=None):
+        self.encoder.eval()
+        self.decoder.eval()
+
+        data_type = 'dummy' if self.config.train_test else 'valid'
+        data = MTDataset(self.config, data_type)
+        dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
+
+        n_words = 0
+        xe_loss = 0
+        n_valid = 0
+        refs = []
+        hyps = []
+
+        for _, (x, y) in enumerate(dataloader):
+            x = x.to(self.config.device)
+            y = y.to(self.config.device)
+
+            scores = self.__predict(x, y, True)
+
+            y = y[:, 1:]
+            nwords = (y != PAD_ID).sum().item()
+            loss = self.criterion(scores, y, nwords)
+
+            n_words += nwords
+            xe_loss += loss.item() * nwords
+            n_valid += (scores.max(2)[1] == y).sum().item()
+
+            generated = self.__generate(x)
+
+            assert len(generated) == len(y), 'size of generated and y are mismatched'
+            for i in range(len(generated)):
+                hyps.append([id.item() for id in generated[i, 1:] if id != PAD_ID])
+                refs.append([[id.item() for id in y[i] if id != PAD_ID]])
+
+        loss = xe_loss / n_words if n_words > 0 else 1e9
+        ppl = np.exp(loss)
+        acc = 100. * n_valid / n_words if n_words > 0 else 0.
+
+        bleu = corpus_bleu(refs, hyps) * 100.
+
+        if epoch is not None:
+            current_time = time.time()
+            self.writer.add_scalar('loss/eval', loss, epoch, current_time)
+            self.writer.add_scalar('ppl/eval', ppl, epoch, current_time)
+            self.writer.add_scalar('acc/eval', acc, epoch, current_time)
+            self.writer.add_scalar('bleu/eval', bleu, epoch, current_time)
+
+            self.__udpate_saved_model(bleu, epoch)
+
+        print('ppl: {:.2f}'.format(ppl))
+        print('acc: {:.2f}'.format(acc))
+        print('bleu: {:.2f}'.format(bleu))
+
+    def __udpate_saved_model(self, bleu, epoch):
+        self.save(epoch, self.config.model_path)
+
+        if len(self.bleu_history) == 0:
+            self.bleu_history.append(bleu)
+            return
+
+        previous_best = self.bleu_history[0]
+        if bleu <= previous_best:
+            self.bleu_history.append(bleu)
+            return
+
+        self.bleu_history = [bleu]
+        self.save(epoch, self.config.best_model_path)
+
+    def is_early_stopping(self):
+        return self.config.early_stopping_threshold < len(self.bleu_history)
 
 class LabelSmoothing(nn.Module):
     def __init__(self, size, smoothing):
@@ -383,6 +493,10 @@ class MTDataset(torch.utils.data.Dataset):
     def __init__(self, config, type):
         self.config = config
         self.data = {} 
+
+        if type == 'dummy':
+            self.__init_with_dummy()
+            return
 
         dataroot = config.dataroot
         for lang in [config.src, config.tgt]:
@@ -417,7 +531,66 @@ class MTDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return (self.data[self.config.src][idx], self.data[self.config.tgt][idx])
 
+    def __init_with_dummy(self):
+        data_size = 1000
+        vocab_size = self.config.vocab_size
+        n_words = self.config.n_words
 
+        data = np.random.randint(PAD_ID+1, vocab_size, size=(data_size, n_words))
+
+        min_words = 5
+        eos_indexes = np.random.randint(min_words, n_words, size=data_size)
+        for i in range(data_size):
+            index = eos_indexes[i]
+            data[i][index] = EOS_ID
+            data[i][index+1:] = PAD_ID
+
+        data[:, 0] = BOS_ID
+        data = torch.from_numpy(data).to(self.config.device, dtype=torch.int)
+
+        self.data[self.config.src] = data.clone()
+        self.data[self.config.tgt] = data
+
+class Config():
+    def __init__(self, args):
+        for key in args.__dict__:
+            setattr(self, key, getattr(args, key))
+        
+        is_cpu = args.cpu or not torch.cuda.is_available()
+        self.device_name = "cpu" if is_cpu else "cuda:0"
+        self.device = torch.device(self.device_name)
+
+        self.model_path = f'{args.dataroot}/{args.name}.pth'
+        self.best_model_path = f'{args.dataroot}/{args.name}.best.pth'
+        self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
+
+        self.start_epoch = 1
+        self.last_steps = 0
+        if os.path.isfile(self.model_path):
+            loaded = torch.load(self.model_path, map_location=self.device_name)
+            self.__set_from_model('batch_size', loaded)
+            self.__set_from_model('vocab_size', loaded)
+            self.__set_from_model('n_layers', loaded)
+            self.__set_from_model('n_heads', loaded)
+            self.__set_from_model('n_words', loaded)
+            self.__set_from_model('dim', loaded)
+            self.__set_from_model('fp16', loaded)
+            self.__set_from_model('name', loaded)
+            self.start_epoch = loaded['last_epoch'] + 1
+            self.last_steps = loaded['last_steps']
+
+        for key in self.__dict__:
+            print('{}: {}'.format(key, getattr(self, key)))
+
+    def __set_from_model(self, key, loaded):
+        assert hasattr(self, key), f'{key} is not found in config'
+        assert key in loaded, f'{key} is not found in loaded model'
+
+        config_value = getattr(self, key)
+        loaded_value = loaded[key]
+        if config_value != loaded_value:
+            print('{} is overwritten by loaded value {}'.format(key, loaded_value))
+            setattr(self, key, loaded_value)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(add_help=True)
@@ -435,48 +608,39 @@ if __name__ == '__main__':
     parser.add_argument('--dim', type=int, default=8, help='dimention of word embeddings')
     parser.add_argument('--dropout', type=int, default=0.1, help='rate of dropout')
     parser.add_argument('--warmup_steps', type=int, default=4000, help='adam lr increases until this steps have passed')
-    parser.add_argument('--model', default='model.pth', help='file to save model parameters')
     parser.add_argument('--generate_test', action='store_true', help='only generate translated sentences')
     parser.add_argument('--train_test', action='store_true', help='training copy task with random value')
+    parser.add_argument('--eval_only', action='store_true', help='execute evaluation only')
+    parser.add_argument('--epochs_by_eval', type=int, default=5, help='evaluate by every this epochs ')
+    parser.add_argument('--fp16', action='store_true', help='run model with float16')
+    parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
+    parser.add_argument('--early_stopping_threshold', type=int, default=3, help='evaluation count to early stopping')
     args = parser.parse_args()
-    print(args)
 
-    is_cpu = args.cpu or not torch.cuda.is_available()
-    device_name = "cpu" if is_cpu else "cuda:0"
-    device = torch.device(device_name)
+    config = Config(args)
 
-    args.device_name = device_name
-    args.device = device
-    args.model_path = f'{args.dataroot}/{args.model}'
+    os.makedirs(config.tensorboard_log_dir, exist_ok=True)
 
-    trainer = Trainer(args)
+    trainer = Trainer(config)
 
-    if args.generate_test:
-        args.src = 'en'
-        args.tgt = 'en'
+    if config.generate_test:
+        config.src = 'en'
+        config.tgt = 'en'
         trainer.generate_test()
         sys.exit()
 
-    data_train = MTDataset(args, 'train')
-    dataloader = torch.utils.data.DataLoader(data_train, batch_size=args.batch_size)
+    if config.eval_only:
+        trainer.evaluate()
+        sys.exit()
 
-    for epoch in range(args.epochs):
-        start_time = time.time()
+    for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
+        trainer.train()
 
-        if args.train_test:
-            for i in range(100):
-                trainer.step()
-                trainer.step_end(i)
-            trainer.save()
-            continue
+        if epoch % config.epochs_by_eval == 0:
+            trainer.evaluate(epoch)
 
-        print(f'start epoch {epoch}')
-        for i, (x, y) in enumerate(dataloader):
-            x = x.to(device)
-            y = y.to(device)
-            trainer.step((x, y))
-            trainer.step_end(i)
-                      
-        trainer.save()
+            if trainer.is_early_stopping():
+                print(f'early stopping epoch: {epoch}')
+                break
 
 

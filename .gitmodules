@@ -1,0 +1,6 @@
+[submodule "apex"]
+	path = apex
+	url = https://github.com/NVIDIA/apex
+[submodule "sentencepiece"]
+	path = sentencepiece
+	url = https://github.com/google/sentencepiece.git
