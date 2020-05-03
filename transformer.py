@@ -221,15 +221,8 @@ class Trainer(object):
 
         self.criterion = LabelSmoothing(config.vocab_size, 0.1).to(config.device)
 
-        if os.path.isfile(config.model_path):
-            data = torch.load(config.model_path, map_location=config.device_name)
-            self.encoder.load_state_dict(data['encoder'])
-            self.decoder.load_state_dict(data['decoder'])
-            self.optimizer_enc.load_state_dict(data['optimizer_enc'])
-            self.optimizer_dec.load_state_dict(data['optimizer_dec'])
-            if self.config.fp16:
-                apex.amp.load_state_dict(data['amp'])
-            print(f'load model from {config.model_path}')
+        model_path = config.best_model_path if config.eval_only else config.model_path
+        self.__load_from_model_path(model_path)
 
         self.start_time = time.time()
         self.bleu_history = []
@@ -268,6 +261,18 @@ class Trainer(object):
         }
         torch.save(data, model_path)
         print(f'save model to {self.config.model_path}')
+
+    def __load_from_model_path(self, path):
+        if not os.path.isfile(path):
+            return
+        data = torch.load(path, map_location=self.config.device_name)
+        self.encoder.load_state_dict(data['encoder'])
+        self.decoder.load_state_dict(data['decoder'])
+        self.optimizer_enc.load_state_dict(data['optimizer_enc'])
+        self.optimizer_dec.load_state_dict(data['optimizer_dec'])
+        if self.config.fp16:
+            apex.amp.load_state_dict(data['amp'])
+        print(f'load model from {path}')
 
     def _get_optimizer(self, model):
         return optim.Adam(model.parameters(), lr=1.0, betas=(0.9, 0.98), eps=1e-9)
@@ -587,6 +592,9 @@ class Config():
             self.__set_from_model('name', loaded)
             self.start_epoch = loaded['last_epoch'] + 1
             self.last_steps = loaded['last_steps']
+
+        if is_cpu:
+            self.fp16 = False
 
         for key in self.__dict__:
             print('{}: {}'.format(key, getattr(self, key)))
