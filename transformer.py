@@ -395,12 +395,18 @@ class Trainer(object):
             self.step(x, y)
             self.step_end()
 
-    def evaluate(self, epoch=None):
+    def evaluate(self, epoch=None, data_type=None):
         self.encoder.eval()
         self.decoder.eval()
 
-        data_type = 'dummy' if self.config.train_test else 'valid'
+        if data_type is None:
+            data_type = 'dummy' if self.config.train_test else 'valid'
+
         data = MTDataset(self.config, data_type)
+        if len(data) == 0:
+            print('no evaluation data for data_type: {}'.format(data_type))
+            return
+
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         n_words = 0
@@ -445,9 +451,12 @@ class Trainer(object):
 
             self.__udpate_saved_model(bleu, epoch)
 
+        print('==============================')
+        print('data_type: {}'.format(data_type))
         print('ppl: {:.2f}'.format(ppl))
         print('acc: {:.2f}'.format(acc))
         print('bleu: {:.2f}'.format(bleu))
+        print('==============================')
 
     def __udpate_saved_model(self, bleu, epoch):
         self.save(epoch, self.config.model_path)
@@ -630,7 +639,8 @@ if __name__ == '__main__':
         sys.exit()
 
     if config.eval_only:
-        trainer.evaluate()
+        trainer.evaluate(data_type='valid')
+        trainer.evaluate(data_type='test')
         sys.exit()
 
     for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
