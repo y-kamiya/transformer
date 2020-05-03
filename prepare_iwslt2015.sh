@@ -5,6 +5,8 @@ data_dir=$1
 script_dir=$(cd `dirname $0`; pwd)
 url="https://wit3.fbk.eu/archive/2015-01/texts/de/en/de-en.tgz"
 
+mkdir -p $data_dir
+
 pushd $data_dir
 
 if [ ! -f en-de.tgz ]; then
