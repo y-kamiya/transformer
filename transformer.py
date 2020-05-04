@@ -221,15 +221,8 @@ class Trainer(object):
 
         self.criterion = LabelSmoothing(config.vocab_size, 0.1).to(config.device)
 
-        if os.path.isfile(config.model_path):
-            data = torch.load(config.model_path, map_location=config.device_name)
-            self.encoder.load_state_dict(data['encoder'])
-            self.decoder.load_state_dict(data['decoder'])
-            self.optimizer_enc.load_state_dict(data['optimizer_enc'])
-            self.optimizer_dec.load_state_dict(data['optimizer_dec'])
-            if self.config.fp16:
-                apex.amp.load_state_dict(data['amp'])
-            print(f'load model from {config.model_path}')
+        model_path = config.best_model_path if config.eval_only else config.model_path
+        self.__load_from_model_path(model_path)
 
         self.start_time = time.time()
         self.bleu_history = []
@@ -268,6 +261,18 @@ class Trainer(object):
         }
         torch.save(data, model_path)
         print(f'save model to {self.config.model_path}')
+
+    def __load_from_model_path(self, path):
+        if not os.path.isfile(path):
+            return
+        data = torch.load(path, map_location=self.config.device_name)
+        self.encoder.load_state_dict(data['encoder'])
+        self.decoder.load_state_dict(data['decoder'])
+        self.optimizer_enc.load_state_dict(data['optimizer_enc'])
+        self.optimizer_dec.load_state_dict(data['optimizer_dec'])
+        if self.config.fp16:
+            apex.amp.load_state_dict(data['amp'])
+        print(f'load model from {path}')
 
     def _get_optimizer(self, model):
         return optim.Adam(model.parameters(), lr=1.0, betas=(0.9, 0.98), eps=1e-9)
@@ -371,17 +376,17 @@ class Trainer(object):
         data = MTDataset(self.config, 'test')
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
-        x, _ = next(iter(dataloader))
-        x = x.to(self.config.device)
+        for x, _ in dataloader:
+            x = x.to(self.config.device)
 
-        generated = self.__generate(x)
+            generated = self.__generate(x)
 
-        for i in range(x.size(0)):
-            print(' '.join([str(id) for id in x[i].tolist()]))
-            print(' '.join([str(int(id)) for id in generated[i].tolist()]))
-            # print('input : {}'.format(x[i].tolist()))
-            # print('output: {}'.format(generated[i].tolist()))
-            # print('')
+            for i in range(x.size(0)):
+                print(' '.join([str(id) for id in x[i].tolist()]))
+                print(' '.join([str(int(id)) for id in generated[i].tolist()]))
+                # print('input : {}'.format(x[i].tolist()))
+                # print('output: {}'.format(generated[i].tolist()))
+                # print('')
 
     def train(self):
         data_type = 'dummy' if self.config.train_test else 'train'
@@ -395,12 +400,18 @@ class Trainer(object):
             self.step(x, y)
             self.step_end()
 
-    def evaluate(self, epoch=None):
+    def evaluate(self, epoch=None, data_type=None):
         self.encoder.eval()
         self.decoder.eval()
 
-        data_type = 'dummy' if self.config.train_test else 'valid'
+        if data_type is None:
+            data_type = 'dummy' if self.config.train_test else 'valid'
+
         data = MTDataset(self.config, data_type)
+        if len(data) == 0:
+            print('no evaluation data for data_type: {}'.format(data_type))
+            return
+
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
         n_words = 0
@@ -445,9 +456,12 @@ class Trainer(object):
 
             self.__udpate_saved_model(bleu, epoch)
 
+        print('==============================')
+        print('data_type: {}'.format(data_type))
         print('ppl: {:.2f}'.format(ppl))
         print('acc: {:.2f}'.format(acc))
         print('bleu: {:.2f}'.format(bleu))
+        print('==============================')
 
     def __udpate_saved_model(self, bleu, epoch):
         self.save(epoch, self.config.model_path)
@@ -560,7 +574,8 @@ class Config():
         self.device_name = "cpu" if is_cpu else "cuda:0"
         self.device = torch.device(self.device_name)
 
-        self.model_path = f'{args.dataroot}/{args.name}.pth'
+        if args.model_path is None:
+            self.model_path = f'{args.dataroot}/{args.name}.pth'
         self.best_model_path = f'{args.dataroot}/{args.name}.best.pth'
         self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
 
@@ -578,6 +593,9 @@ class Config():
             self.__set_from_model('name', loaded)
             self.start_epoch = loaded['last_epoch'] + 1
             self.last_steps = loaded['last_steps']
+
+        if is_cpu:
+            self.fp16 = False
 
         for key in self.__dict__:
             print('{}: {}'.format(key, getattr(self, key)))
@@ -615,6 +633,7 @@ if __name__ == '__main__':
     parser.add_argument('--fp16', action='store_true', help='run model with float16')
     parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
     parser.add_argument('--early_stopping_threshold', type=int, default=3, help='evaluation count to early stopping')
+    parser.add_argument('--model_path', default=None, help='model path')
     args = parser.parse_args()
 
     config = Config(args)
@@ -624,13 +643,13 @@ if __name__ == '__main__':
     trainer = Trainer(config)
 
     if config.generate_test:
-        config.src = 'en'
-        config.tgt = 'en'
+        config.tgt = config.src
         trainer.generate_test()
         sys.exit()
 
     if config.eval_only:
-        trainer.evaluate()
+        trainer.evaluate(data_type='valid')
+        trainer.evaluate(data_type='test')
         sys.exit()
 
     for epoch in range(config.start_epoch, config.start_epoch + config.epochs):
