@@ -376,17 +376,17 @@ class Trainer(object):
         data = MTDataset(self.config, 'test')
         dataloader = torch.utils.data.DataLoader(data, batch_size=args.batch_size)
 
-        x, _ = next(iter(dataloader))
-        x = x.to(self.config.device)
+        for x, _ in dataloader:
+            x = x.to(self.config.device)
 
-        generated = self.__generate(x)
+            generated = self.__generate(x)
 
-        for i in range(x.size(0)):
-            print(' '.join([str(id) for id in x[i].tolist()]))
-            print(' '.join([str(int(id)) for id in generated[i].tolist()]))
-            # print('input : {}'.format(x[i].tolist()))
-            # print('output: {}'.format(generated[i].tolist()))
-            # print('')
+            for i in range(x.size(0)):
+                print(' '.join([str(id) for id in x[i].tolist()]))
+                print(' '.join([str(int(id)) for id in generated[i].tolist()]))
+                # print('input : {}'.format(x[i].tolist()))
+                # print('output: {}'.format(generated[i].tolist()))
+                # print('')
 
     def train(self):
         data_type = 'dummy' if self.config.train_test else 'train'
@@ -574,7 +574,8 @@ class Config():
         self.device_name = "cpu" if is_cpu else "cuda:0"
         self.device = torch.device(self.device_name)
 
-        self.model_path = f'{args.dataroot}/{args.name}.pth'
+        if args.model_path is None:
+            self.model_path = f'{args.dataroot}/{args.name}.pth'
         self.best_model_path = f'{args.dataroot}/{args.name}.best.pth'
         self.tensorboard_log_dir = f'{args.dataroot}/runs/{args.name}'
 
@@ -632,6 +633,7 @@ if __name__ == '__main__':
     parser.add_argument('--fp16', action='store_true', help='run model with float16')
     parser.add_argument('--name', default='default', help='name of training, used to model name, log dir name etc')
     parser.add_argument('--early_stopping_threshold', type=int, default=3, help='evaluation count to early stopping')
+    parser.add_argument('--model_path', default=None, help='model path')
     args = parser.parse_args()
 
     config = Config(args)
@@ -641,8 +643,7 @@ if __name__ == '__main__':
     trainer = Trainer(config)
 
     if config.generate_test:
-        config.src = 'en'
-        config.tgt = 'en'
+        config.tgt = config.src
         trainer.generate_test()
         sys.exit()
 
